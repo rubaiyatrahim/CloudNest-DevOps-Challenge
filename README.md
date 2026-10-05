@@ -39,3 +39,27 @@ git commit -m "WIP: Feature for client demo"
 
 _Why:_ `git stash` safely stores our modified tracked files and staged changes on a stack of unfinished changes, giving us a clean working directory to address the urgent bug. <br/>
 ![Task 2](screenshots/task2.png)
+
+## Task 3: Cleaning the History
+
+Nadia wants to see two different ways of bringing a feature branch up to date: a rebase (linear history) and a merge (preserved history). So, we duplicate our current feature branch so we can demonstrate both methods side-by-side.
+
+```
+git checkout feature/new-client-demo
+git branch demo-rebase
+git branch demo-merge
+
+# The Merge Approach (Preserves history)
+git checkout demo-merge
+git merge main
+# (If a text editor opens, save and close it to accept the merge commit)
+
+# The Rebase Approach (Linear history)
+git checkout demo-rebase
+git rebase main
+```
+
+_The Merge Approach Result:_ This creates a "merge commit." It preserves the exact chronological history and shows that the feature branch lived independently before being joined back.<br/>
+![Merge](screenshots/task3-1.png)
+_The Rebase Approach Result:_ This rewinds our feature branch commits, pulls in the new main commits, and replays our feature commits on top. It looks like we wrote our feature after the latest main updates, keeping a clean, straight line of history.<br/>
+![Rebase](screenshots/task3-2.png)
