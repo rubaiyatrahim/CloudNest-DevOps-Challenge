@@ -63,3 +63,18 @@ _The Merge Approach Result:_ This creates a "merge commit." It preserves the exa
 ![Merge](screenshots/task3-1.png)
 _The Rebase Approach Result:_ This rewinds our feature branch commits, pulls in the new main commits, and replays our feature commits on top. It looks like we wrote our feature after the latest main updates, keeping a clean, straight line of history.<br/>
 ![Rebase](screenshots/task3-2.png)
+
+## Task 4: The Embarrassing Message
+
+Fix a bad commit message.
+
+```
+git checkout feature/new-client-demo
+
+# Create a file named asdf.txt
+git add asdf.txt
+git commit -m "asdf fix"
+
+# Fix the message
+git commit --amend -m "Fix database connection timeout issue"
+```
