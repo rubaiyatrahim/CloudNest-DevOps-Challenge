@@ -20,6 +20,7 @@ Fix a bad commit message.
 
 ```
 git checkout feature/new-client-demo
+
 # Create a file named asdf.txt
 git add asdf.txt
 git commit -m "asdf fix"
