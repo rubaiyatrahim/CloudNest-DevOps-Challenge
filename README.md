@@ -13,3 +13,17 @@ git checkout -b feature/new-client-demo
 ```
 
 _Why:_ This creates a safe, isolated branch (`feature/new-client-demo`) based on the most up-to-date version of `main`. If things break, `main` remains untouched. <br/>
+
+## Task 4: The Embarrassing Message
+
+Fix a bad commit message.
+
+```
+git checkout feature/new-client-demo
+# Create a file named asdf.txt
+git add asdf.txt
+git commit -m "asdf fix"
+
+# Fix the message
+git commit --amend -m "Fix database connection timeout issue"
+```
