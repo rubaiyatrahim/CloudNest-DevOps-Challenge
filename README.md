@@ -143,6 +143,9 @@ jobs:
 
 ### 5.4 Test Push
 
-Commit the changes to main and push to see the CI pipeline running.
-
+Commit the changes to main and push to see the CI pipeline running.<br/>
+![CI](screenshots/task5-1.png)<br/>
+CI found succeeded to run the pipeline in GitHub.<br/>
+![CI-GitHub](screenshots/task5-2.png)<br/>
+![CI-GitHub2](screenshots/task5-3.png)
 _Why:_ By specifying `runs-on: self-hosted`, the CI pipeline bypasses GitHub's paid cloud runners and executes directly on the company-owned server where the runner agent is listening.
