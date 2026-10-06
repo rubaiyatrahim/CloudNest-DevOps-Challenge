@@ -404,3 +404,45 @@ Now that Alloy is streaming logs to Loki, we need to make them visible in our da
   ![Loki-2](screenshots/task6-5.png)
   <br/>
   That completes Task 6.
+
+## Task 7: The Dashboard
+
+Build a dashboard with 4 panels using PromQL.
+
+- Open our Grafana instance in the browser (`http://<SERVER_IP>:3000`).
+- Navigate to Dashboards > Create Dashboard.
+
+### CPU Usage:
+
+Add new panel name `CPU Usage` with the following PromQL:
+
+```
+100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+```
+
+### Memory Usage:
+
+Add new panel name `Memory Usage` with the following PromQL:
+
+```
+100 * (1 - ((node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes) / node_memory_MemTotal_bytes))
+```
+
+### Disk Space:
+
+Add new panel name `Disk Space` with the following PromQL:
+
+```
+100 - ((node_filesystem_avail_bytes{mountpoint="/"} * 100) / node_filesystem_size_bytes{mountpoint="/"})
+```
+
+### Network Traffic:
+
+Add new panel name `Network Traffic` with the following PromQL:
+
+```
+rate(node_network_receive_bytes_total[5m])
+```
+
+Finally, save the dashboard giving a name.
+![Dashboard](screenshots/task7.png)
