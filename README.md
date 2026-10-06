@@ -78,3 +78,71 @@ git commit -m "asdf fix"
 # Fix the message
 git commit --amend -m "Fix database connection timeout issue"
 ```
+
+## Task 5: Our Own CI
+
+### 5.1 Create EC2 Instance
+
+At first a new EC2 instance was created as follows:<br/>
+![EC2](screenshots/ec2create.png)
+<br/>
+
+### 5.2 Configure Self-Hosted Runner
+
+To replace the paid cloud service with a self-hosted runner, we will use GitHub Actions configured for a self-hosted machine.
+
+#### 5.2.1. Go to our GitHub Repository > Settings > Actions > Runners.
+
+#### 5.2.2. Click New self-hosted runner. Select Linux, x64.
+
+#### 5.2.3. SSH into our Ubuntu server and run the exact download/configure commands GitHub provides.
+
+_Download_
+
+```
+# Create a folder
+$ mkdir actions-runner && cd actions-runner# Download the latest runner package
+$ curl -o actions-runner-linux-x64-2.337.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.337.0/actions-runner-linux-x64-2.337.0.tar.gz# Optional: Validate the hash
+$ echo "70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613  actions-runner-linux-x64-2.337.0.tar.gz" | shasum -a 256 -c# Extract the installer
+$ tar xzf ./actions-runner-linux-x64-2.337.0.tar.gz
+```
+
+_Configure_
+
+```
+# Create the runner and start the configuration experience
+$ ./config.sh --url https://github.com/rubaiyatrahim/CloudNest-DevOps-Challenge --token ADERNOCSXS3YJ6565EI3WCDKYT6XU# Last step, run it!
+$ ./run.sh
+```
+
+_Using your self-hosted runner_
+
+```
+# Use this YAML in your workflow file for each job
+runs-on: self-hosted
+```
+
+### 5.3 Configure the Pipeline
+
+Create a file in your project at `.github/workflows/ci.yml`:
+
+```
+name: CloudNest Self-Hosted CI
+on: [push]
+jobs:
+  build-and-test:
+    runs-on: self-hosted
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Run Build pipeline
+        run: echo "Building project..."
+      - name: Run Tests
+        run: echo "Testing project..."
+```
+
+### 5.4 Test Push
+
+Commit the changes to main and push to see the CI pipeline running.
+
+_Why:_ By specifying `runs-on: self-hosted`, the CI pipeline bypasses GitHub's paid cloud runners and executes directly on the company-owned server where the runner agent is listening.
