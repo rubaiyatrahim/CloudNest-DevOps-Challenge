@@ -288,3 +288,117 @@ sudo systemctl status prometheus
 #### 6.2.7. **Screenshot Requirements:** Open `http://<SERVER_IP>:9090/targets` in the browser.
 
 ![Prometheus](screenshots/task6-2.png)
+
+### 6.3. Grafana Setup
+
+#### 6.3.1. Install Grafana Manually:
+
+```
+sudo apt-get install -y apt-transport-https wget gnupg
+sudo mkdir -p /etc/apt/keyrings
+sudo wget -O /etc/apt/keyrings/grafana.asc https://apt.grafana.com/gpg-full.key
+sudo chmod 644 /etc/apt/keyrings/grafana.asc
+echo "deb [signed-by=/etc/apt/keyrings/grafana.asc] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+sudo apt-get update
+sudo apt-get install grafana
+```
+
+#### 6.3.2. Start Service:
+
+```
+sudo systemctl start grafana-server
+sudo systemctl enable --now grafana-server
+sudo systemctl status grafana-server
+```
+
+#### 6.3.3. Add Inbound Rule to Allow Port `3000` from Anywhere
+
+#### 6.3.4. Configure Datasource and Dashboard:
+
+#### 6.3.4.1. Open `http://<SERVER_IP>:3000` (Default login: `admin / admin`).
+
+#### 6.3.4.2. Go to Connections > Data Sources > Add data source -> Select Prometheus.
+
+#### 6.3.4.3. Set URL to `http://localhost:9090`, then click Save & Test.
+
+![Grafana-Prometheus](screenshots/task6-3.png)
+
+### 6.4. Loki and Alloy Setup
+
+#### 6.4.1. Install and Run Loki (The Log Database)
+
+Loki will receive and store the logs that Alloy collects.
+
+##### 6.4.1.1. Download the Loki binary and its default configuration file:
+
+```
+curl -O -L "https://github.com/grafana/loki/releases/download/v3.0.0/loki-linux-amd64.zip"
+unzip loki-linux-amd64.zip
+chmod a+x loki-linux-amd64
+wget https://raw.githubusercontent.com/grafana/loki/main/cmd/loki/loki-local-config.yaml
+```
+
+##### 6.4.1.2. Run Loki in the background (it runs on port `3100` by default):
+
+```
+./loki-linux-amd64 -config.file=loki-local-config.yaml &
+```
+
+#### 6.4.2. Install Grafana Alloy (The Telemetry Agent)
+
+Alloy will read our server's log files and forward them to Loki. Add the Grafana APT repository and install Alloy (for Debian/Ubuntu servers):
+
+```
+sudo mkdir -p /etc/apt/keyrings/
+wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+
+sudo apt-get update
+sudo apt-get install alloy
+```
+
+#### 6.4.3. Configure Alloy
+
+Alloy uses a specific .alloy configuration file to determine what to collect and where to send it.
+
+- Open the Alloy configuration file: `sudo nano /etc/alloy/config.alloy`.
+- Replace the contents with this configuration. This tells Alloy to read system logs from `/var/log` and send them to the Loki instance running on port `3100`:
+
+```
+// 1. Discover local log files
+local.file_match "system_logs" {
+  path_targets = [{"__path__" = "/var/log/*.log"}]
+}
+
+// 2. Read the discovered files
+loki.source.file "log_reader" {
+  targets    = local.file_match.system_logs.targets
+  forward_to = [loki.write.local_loki.receiver]
+}
+
+// 3. Send the logs to your Loki instance
+loki.write "local_loki" {
+  endpoint {
+    url = "http://localhost:3100/loki/api/v1/push"
+  }
+}
+```
+
+- Restart the Alloy service to apply the changes:
+
+```
+sudo systemctl restart alloy
+sudo systemctl enable alloy
+```
+
+#### 6.4.4. Connect Loki to Grafana
+
+Now that Alloy is streaming logs to Loki, we need to make them visible in our dashboard.
+
+- Open our Grafana instance in the browser (`http://<SERVER_IP>:3000`).
+- Navigate to Connections > Data Sources > Add new data source.
+- Select Loki.
+- Set the URL to `http://localhost:3100` and click Save & Test.
+  ![Loki](screenshots/task6-4.png)
+- To view the logs, go to Explore (the compass icon in the left menu), select Loki from the dropdown, and run a query like {filename="/var/log/syslog"} or {filename="/var/log/auth.log"}.
+  ![Loki-2](screenshots/task6-5.png)
