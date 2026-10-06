@@ -402,3 +402,5 @@ Now that Alloy is streaming logs to Loki, we need to make them visible in our da
   ![Loki](screenshots/task6-4.png)
 - To view the logs, go to Explore (the compass icon in the left menu), select Loki from the dropdown, and run a query like {filename="/var/log/syslog"} or {filename="/var/log/auth.log"}.
   ![Loki-2](screenshots/task6-5.png)
+  <br/>
+  That completes Task 6.
