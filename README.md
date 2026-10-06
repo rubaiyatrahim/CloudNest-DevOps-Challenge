@@ -149,3 +149,60 @@ CI found succeeded to run the pipeline in GitHub.<br/>
 ![CI-GitHub](screenshots/task5-2.png)<br/>
 ![CI-GitHub2](screenshots/task5-3.png)
 _Why:_ By specifying `runs-on: self-hosted`, the CI pipeline bypasses GitHub's paid cloud runners and executes directly on the company-owned server where the runner agent is listening.
+
+## Task 6: The Blind Server
+
+We will install and run Node Exporter, Prometheus, Alloy and Grafana to complete this task.
+
+### 6.1. Node Exporter Setup
+
+Node Exporter collects system-level metrics (CPU, RAM, Disk, Network) and exposes them on port 9100.
+
+#### 6.1.1. Download and Extract Binary:
+
+```
+wget https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+tar xvfz node_exporter-1.7.0.linux-amd64.tar.gz
+sudo mv node_exporter-1.7.0.linux-amd64/node_exporter /usr/local/bin/
+rm -rf node_exporter-1.7.0.linux-amd64\*
+```
+
+#### 6.1.2. Create System User:
+
+```
+sudo useradd --no-create-home --shell /bin/false node_exporter
+```
+
+#### 6.1.3. Configure Systemd Service:
+
+Create a service file: `sudo nano /etc/systemd/system/node_exporter.service`
+
+```
+[Unit]
+Description=Node Exporter
+After=network.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
+```
+
+#### 6.1.4. Start and Verify:
+
+```
+sudo systemctl daemon-reload
+sudo systemctl enable --now node_exporter
+sudo systemctl start node_exporter
+sudo systemctl status node_exporter
+```
+
+#### 6.1.5. Add Inbound Rule to Allow Port `9100` from Anywhere
+
+#### 6.1.6. **Screenshot Requirement:** Open `http://<SERVER_IP>:9100/metrics` in the browser.
+
+![NodeExporter](screenshots/task6-1.png)
